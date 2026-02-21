@@ -1,17 +1,73 @@
+document.addEventListener("DOMContentLoaded", () => {
+
 const API_BASE = "/flood_iot/app/api";
 
+/* ===============================
+   VARIABEL STATUS BAHAYA
+================================ */
+let lastStatus = null;
+let dangerShown = false;
+
+/* ===============================
+   ELEMEN POPUP BAHAYA
+================================ */
+const dangerOverlay = document.getElementById("dangerOverlay");
+const dangerMessage = document.getElementById("dangerMessage");
+const closeDanger   = document.getElementById("closeDanger");
+
+/* ===============================
+   FUNGSI POPUP BAHAYA
+================================ */
+function showDangerPopup(air) {
+  if (!dangerOverlay) return;
+
+  dangerMessage.innerText =
+    `Ketinggian air telah mencapai ${air} cm dan berada pada level berbahaya.
+     Segera lakukan tindakan pencegahan dan evakuasi jika diperlukan.`;
+
+  dangerOverlay.classList.remove("hidden");
+}
+
+closeDanger?.addEventListener("click", () => {
+  dangerOverlay.classList.add("hidden");
+});
+
+/* ===============================
+   LOAD DATA TERBARU
+================================ */
 async function loadLatest() {
   const res = await fetch(`${API_BASE}/latest.php`);
   const data = await res.json();
-
   if (!data) return;
 
-  document.getElementById("heroStatus").innerText = data.status;
-  document.getElementById("statusText").innerText = data.status;
+  const currentStatus = data.status;
+
+  document.getElementById("heroStatus").innerText = currentStatus;
+  document.getElementById("statusText").innerText = currentStatus;
   document.getElementById("tinggiAir").innerText = data.tinggi_air + " cm";
   document.getElementById("updateTime").innerText = data.updated;
+
+  /* 🔴 TRIGGER POPUP SAAT TRANSISI KE BAHAYA */
+  if (
+    currentStatus === "BAHAYA" &&
+    lastStatus !== "BAHAYA" &&
+    !dangerShown
+  ) {
+    showDangerPopup(data.tinggi_air);
+    dangerShown = true;
+  }
+
+  /* reset jika status turun */
+  if (currentStatus !== "BAHAYA") {
+    dangerShown = false;
+  }
+
+  lastStatus = currentStatus;
 }
 
+/* ===============================
+   LOAD RIWAYAT DATA
+================================ */
 async function loadHistory() {
   const res = await fetch(`${API_BASE}/history.php`);
   const data = await res.json();
@@ -30,6 +86,9 @@ async function loadHistory() {
   });
 }
 
+/* ===============================
+   LOAD CHART
+================================ */
 let chart;
 
 async function loadChart() {
@@ -37,7 +96,6 @@ async function loadChart() {
   const data = await res.json();
 
   const ctx = document.getElementById("chartAir").getContext("2d");
-
   if (chart) chart.destroy();
 
   chart = new Chart(ctx, {
@@ -77,6 +135,9 @@ async function loadChart() {
   });
 }
 
+/* ===============================
+   LOAD AWAL + INTERVAL
+================================ */
 loadLatest();
 loadHistory();
 loadChart();
@@ -87,15 +148,18 @@ setInterval(() => {
   loadChart();
 }, 5000);
 
+/* ===============================
+   CHAT AI
+================================ */
 const chatBubble = document.getElementById("chatBubble");
 const chatWindow = document.getElementById("chatWindow");
 const chatToggle = document.getElementById("chatToggle");
-const chatIcon = document.getElementById("chatIcon");
-const closeChat = document.getElementById("closeChat");
+const chatIcon   = document.getElementById("chatIcon");
+const closeChat  = document.getElementById("closeChat");
 
-const chatForm = document.getElementById("chatForm");
+const chatForm  = document.getElementById("chatForm");
 const chatInput = document.getElementById("chatInput");
-const chatBox = document.getElementById("chatBox");
+const chatBox   = document.getElementById("chatBox");
 
 let isChatOpen = false;
 
@@ -189,3 +253,5 @@ async function askAiBackend(message) {
     return "AI tidak dapat dihubungi.";
   }
 }
+
+});

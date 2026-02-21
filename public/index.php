@@ -145,6 +145,29 @@
   </form>
 </div>
 
+<div id="dangerOverlay" class="fixed inset-0 z-[999] hidden">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+  <div class="relative flex items-center justify-center h-full">
+    <div class="bg-dark-card border border-red-500/40 rounded-3xl p-8 w-[90%] max-w-md text-center shadow-2xl">
+      
+      <div class="text-red-500 mb-4 flex justify-center">
+        <span class="iconify text-6xl" data-icon="solar:danger-triangle-bold"></span>
+      </div>
+      <h2 class="text-2xl font-bold text-red-400 mb-3">STATUS BAHAYA</h2>
+      <p id="dangerMessage" class="text-gray-300 mb-6 leading-relaxed">
+        Ketinggian air sungai berada pada level berbahaya.
+        Segera waspada terhadap potensi banjir.
+      </p>
+      <button
+        id="closeDanger"
+        class="px-6 py-3 rounded-xl bg-red-500/90 text-white font-semibold hover:bg-red-600 transition">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+
 <script src="js/dashboard.js"></script>
 </body>
 </html>
